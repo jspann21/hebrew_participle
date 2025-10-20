@@ -2,13 +2,20 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,27 +25,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: site/package-lock.json
 
       - name: Install dependencies
-        run: |
-          cd site
-          npm ci
+        working-directory: site
+        run: npm ci
 
-      - name: Run ETL
-        run: |
-          cd site
-          npm run etl
-
-      - name: Build and Export
+      - name: Build site
         env:
           NEXT_PUBLIC_BASE_PATH: /hebrew_participle
+        working-directory: site
         run: |
-          cd site
+          # If your Next.js build also does `next export`, you're good.
+          # If not, add: npm run export
           npm run build
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: site/out
+          path: site/out
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
