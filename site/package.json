@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "etl": "tsx scripts/etl/build_dataset.ts",
-    "build": "npm run etl && next build --turbopack && next export",
+    "build": "npm run etl && next build --turbopack",
     "start": "next start",
     "lint": "eslint"
   },
