@@ -14,6 +14,7 @@ export default function Home() {
         <p>Explore Hebrew participle patterns across the BHSA corpus.</p>
         <div className="flex gap-6">
           <Link className="underline" href="/explore">Explorer</Link>
+          <Link className="underline" href="/visualizations">Visualizations</Link>
           <Link className="underline" href="/methodology">Methodology</Link>
           <Link className="underline" href="/data">Data</Link>
         </div>

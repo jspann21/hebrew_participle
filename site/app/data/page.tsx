@@ -31,6 +31,15 @@ export default function DataPage() {
         <li>
           <a className="underline" href={`${base}/data/meta/summary.json`}>meta/summary.json</a>
         </li>
+        <li className="mt-4 font-semibold">New aggregates</li>
+        <li><a className="underline" href={`${base}/data/agg/state_by_usage.json`}>agg/state_by_usage.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/prefix_combo_by_binyan.json`}>agg/prefix_combo_by_binyan.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/person_distribution.json`}>agg/person_distribution.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/relative_by_binyan.json`}>agg/relative_by_binyan.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/et_marker_by_binyan.json`}>agg/et_marker_by_binyan.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/prep_type_by_binyan.json`}>agg/prep_type_by_binyan.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/position_bins.json`}>agg/position_bins.json</a></li>
+        <li><a className="underline" href={`${base}/data/agg/following_pos.json`}>agg/following_pos.json</a></li>
       </ul>
     </div>
   );

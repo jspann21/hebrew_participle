@@ -13,11 +13,17 @@ type Row = {
   usage: "verbal" | "adjectival" | "substantive";
   gender?: string;
   number?: string;
+  state?: string;
+  person?: string;
   hasArticle: boolean;
   negated: boolean;
   wordUnpointed: string;
   wordPointed: string;
   gloss: string;
+  prefixChain?: string[];
+  prefixLettersChain?: string[];
+  relativeClause?: boolean;
+  objectMarkerBefore?: boolean;
 };
 
 export default function Explore() {
@@ -28,6 +34,10 @@ export default function Explore() {
   const [usage, setUsage] = useState<string>("");
   const [definite, setDefinite] = useState<string>("");
   const [neg, setNeg] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [person, setPerson] = useState<string>("");
+  const [hasRel, setHasRel] = useState<string>("");
+  const [hasEt, setHasEt] = useState<string>("");
   const [query, setQuery] = useState<string>("");
 
   useEffect(() => {
@@ -64,14 +74,18 @@ export default function Explore() {
       (!usage || r.usage === usage) &&
       (!definite || (definite === "yes" ? r.hasArticle : !r.hasArticle)) &&
       (!neg || (neg === "yes" ? r.negated : !r.negated)) &&
+      (!state || r.state === state) &&
+      (!person || r.person === person) &&
+      (!hasRel || (hasRel === "yes" ? !!r.relativeClause : !r.relativeClause)) &&
+      (!hasEt || (hasEt === "yes" ? !!r.objectMarkerBefore : !r.objectMarkerBefore)) &&
       (!query || r.wordUnpointed.includes(query) || r.wordPointed.includes(query) || (r.gloss || "").includes(query))
     );
-  }, [rows, book, binyan, voice, usage, definite, neg, query]);
+  }, [rows, book, binyan, voice, usage, definite, neg, state, person, hasRel, hasEt, query]);
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Explorer</h1>
-      <div className="grid grid-cols-2 md:grid-cols-8 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-12 gap-4 mb-6">
         <Input placeholder="Search word/gloss" value={query} onChange={(e) => setQuery(e.target.value)} />
         <Select value={book} onValueChange={setBook}>
           <SelectTrigger><SelectValue placeholder="Book" /></SelectTrigger>
@@ -105,6 +119,22 @@ export default function Explore() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={state} onValueChange={setState}>
+          <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
+          <SelectContent>
+            {(["absolute","construct","unknown"]).map(s => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={person} onValueChange={setPerson}>
+          <SelectTrigger><SelectValue placeholder="Person" /></SelectTrigger>
+          <SelectContent>
+            {(["1","2","3","unknown"]).map(p => (
+              <SelectItem key={p} value={p}>{p}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={definite} onValueChange={setDefinite}>
           <SelectTrigger><SelectValue placeholder="Definite?" /></SelectTrigger>
           <SelectContent>
@@ -114,6 +144,20 @@ export default function Explore() {
         </Select>
         <Select value={neg} onValueChange={setNeg}>
           <SelectTrigger><SelectValue placeholder="Negated?" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="yes">Yes</SelectItem>
+            <SelectItem value="no">No</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={hasRel} onValueChange={setHasRel}>
+          <SelectTrigger><SelectValue placeholder="Relative?" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="yes">Yes</SelectItem>
+            <SelectItem value="no">No</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={hasEt} onValueChange={setHasEt}>
+          <SelectTrigger><SelectValue placeholder="Et marker?" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="yes">Yes</SelectItem>
             <SelectItem value="no">No</SelectItem>
@@ -135,6 +179,9 @@ export default function Explore() {
                   <th className="py-2">Binyan</th>
                   <th className="py-2">Voice</th>
                   <th className="py-2">Usage</th>
+                  <th className="py-2">State</th>
+                  <th className="py-2">Pers</th>
+                  <th className="py-2">Prefixes</th>
                   <th className="py-2">Gn</th>
                   <th className="py-2">Nu</th>
                 </tr>
@@ -147,6 +194,9 @@ export default function Explore() {
                     <td className="py-1">{r.binyan}</td>
                     <td className="py-1">{r.voice}</td>
                     <td className="py-1">{r.usage}</td>
+                    <td className="py-1">{r.state || "-"}</td>
+                    <td className="py-1">{r.person || "-"}</td>
+                    <td className="py-1">{(r.prefixLettersChain || []).join("")}</td>
                     <td className="py-1">{r.gender || "-"}</td>
                     <td className="py-1">{r.number || "-"}</td>
                   </tr>
