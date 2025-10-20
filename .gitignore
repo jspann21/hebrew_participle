@@ -1,0 +1,44 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Node / Next.js
+**/node_modules/
+**/.next/
+**/out/
+**/.vercel/
+**/.turbo/
+**/.cache/
+**/.eslintcache
+*.tsbuildinfo
+**/dist/
+
+# Coverage
+coverage/
+
+# Editor
+.vscode/
+.idea/
+.history/
+
+# Temp
+tmp/
+temp/
+*.swp
+*.swo
+
+# Generated ETL output (rebuilt in CI)
+site/public/data/
+
