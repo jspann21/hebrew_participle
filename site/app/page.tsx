@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
@@ -38,8 +39,8 @@ export default function Home() {
 
 function useJson<T>(path: string, initial: T): T {
   const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const [data, setData] = (require("react") as typeof import("react")).useState<T>(initial);
-  (require("react") as typeof import("react")).useEffect(() => {
+  const [data, setData] = useState<T>(initial);
+  useEffect(() => {
     const url = `${base}${path}`;
     fetch(url).then((r) => r.json()).then(setData).catch(() => {});
   }, [path, base]);
@@ -70,7 +71,13 @@ function OverviewBinyanVoice() {
   const binyans = Object.keys(byBinyan);
   const active = binyans.map((b) => byBinyan[b].active);
   const passive = binyans.map((b) => byBinyan[b].passive);
-  const option = {
+  const option: {
+    tooltip: { trigger: string };
+    legend: { data: string[] };
+    xAxis: { type: string; data: string[] };
+    yAxis: { type: string };
+    series: Array<{ name: string; type: string; stack: string; data: number[] }>;
+  } = {
     tooltip: { trigger: "axis" },
     legend: { data: ["Active", "Passive"] },
     xAxis: { type: "category", data: binyans },
@@ -80,5 +87,5 @@ function OverviewBinyanVoice() {
       { name: "Passive", type: "bar", stack: "v", data: passive },
     ],
   };
-  return <ReactECharts option={option as any} style={{ height: 320 }} />;
+  return <ReactECharts option={option} style={{ height: 320 }} />;
 }

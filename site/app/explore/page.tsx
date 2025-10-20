@@ -1,11 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 type Row = {
   bookName: string;
