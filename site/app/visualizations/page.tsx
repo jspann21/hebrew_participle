@@ -3,6 +3,41 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// ECharts option types
+interface EChartsOption {
+  tooltip?: {
+    trigger?: string;
+    formatter?: (params: unknown) => string;
+  };
+  legend?: {
+    data?: string[];
+  };
+  xAxis?: {
+    type?: string;
+    data?: string[];
+  };
+  yAxis?: {
+    type?: string;
+    axisLabel?: {
+      formatter?: (value: number) => string;
+    };
+  };
+  visualMap?: {
+    min?: number;
+    max?: number;
+    orient?: string;
+    left?: string;
+  };
+  series?: Array<{
+    type?: string;
+    name?: string;
+    stack?: string;
+    data?: number[] | Array<[number, number, number]> | Array<{ name: string; value: number }>;
+    radius?: number[];
+    roseType?: string;
+  }>;
+}
+
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 function useJson<T>(path: string, initial: T): T {
@@ -116,7 +151,7 @@ function BarSimple({ data }: { data: Record<string, number> }) {
     xAxis: { type: "category", data: keys },
     yAxis: { type: "value" },
     series: [{ type: "bar", data: keys.map(k => data[k]) }],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 360, minWidth: 600 }} />;
 }
 
@@ -133,7 +168,7 @@ function BarStackBinyanVoice({ data }: { data: Record<string, { active: number; 
       { name: "Active", type: "bar", stack: "v", data: active },
       { name: "Passive", type: "bar", stack: "v", data: passive },
     ],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 360, minWidth: 600 }} />;
 }
 
@@ -148,14 +183,14 @@ function PieUsage({ data }: { data: Record<string, number> }) {
         data: Object.entries(data).map(([name, value]) => ({ name, value })),
       },
     ],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 360 }} />;
 }
 
 function HeatBookBinyan({ data }: { data: Record<string, Record<string, number>> }) {
   const books = Object.keys(data);
   const binyans = Array.from(new Set(books.flatMap(b => Object.keys(data[b]))));
-  const seriesData = [] as any[];
+  const seriesData: Array<[number, number, number]> = [];
   books.forEach((book, i) => {
     binyans.forEach((bin, j) => {
       seriesData.push([j, i, data[book][bin] || 0]);
@@ -167,7 +202,7 @@ function HeatBookBinyan({ data }: { data: Record<string, Record<string, number>>
     yAxis: { type: "category", data: books },
     visualMap: { min: 0, max: Math.max(...seriesData.map((d) => d[2] || 0), 1), orient: "horizontal", left: "center" },
     series: [{ type: "heatmap", data: seriesData }],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 600, minWidth: 700 }} />;
 }
 
@@ -180,14 +215,14 @@ function StackedBarsMatrix({ data }: { data: Record<string, Record<string, numbe
     xAxis: { type: "category", data: genders },
     yAxis: { type: "value" },
     series: numbers.map(n => ({ name: n, type: "bar", stack: "x", data: genders.map(g => data[g][n] || 0) })),
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 360, minWidth: 600 }} />;
 }
 
 function HeatSimple({ data }: { data: Record<string, Record<string, number>> }) {
   const rows = Object.keys(data);
   const cols = Array.from(new Set(rows.flatMap(r => Object.keys(data[r]))));
-  const seriesData = [] as any[];
+  const seriesData: Array<[number, number, number]> = [];
   rows.forEach((r, i) => cols.forEach((c, j) => seriesData.push([j, i, data[r][c] || 0])));
   const option = {
     tooltip: {},
@@ -195,24 +230,25 @@ function HeatSimple({ data }: { data: Record<string, Record<string, number>> }) 
     yAxis: { type: "category", data: rows },
     visualMap: { min: 0, max: Math.max(...seriesData.map(d => d[2] || 0), 1), orient: "horizontal", left: "center" },
     series: [{ type: "heatmap", data: seriesData }],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 400, minWidth: 700 }} />;
 }
 
 function RateByKey({ data, rateKey }: { data: Record<string, { [k: string]: number; total: number }>; rateKey: string }) {
   const keys = Object.keys(data);
   const option = {
-    tooltip: { trigger: "axis", formatter: (params: any) => params.map((p: any) => `${p.name}: ${(p.value * 100).toFixed(1)}%`).join("<br/>") },
+    tooltip: { trigger: "axis", formatter: (params: unknown) => {
+      const paramArray = Array.isArray(params) ? params : [params];
+      return paramArray.map((p: { name: string; value: number }) => `${p.name}: ${(p.value * 100).toFixed(1)}%`).join("<br/>");
+    } },
     xAxis: { type: "category", data: keys },
     yAxis: { type: "value", axisLabel: { formatter: (v: number) => `${(v * 100).toFixed(0)}%` } },
     series: [{ type: "bar", data: keys.map(k => (data[k][rateKey] || 0) / Math.max(1, data[k].total)) }],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 360, minWidth: 600 }} />;
 }
 
 function TopCombos({ data }: { data: Record<string, Record<string, number>> }) {
-  const binyans = Object.keys(data);
-  const tabs = binyans;
   // Show a simple concatenated bar chart of top combos overall
   const merged = Object.entries(data).flatMap(([b, combos]) => Object.entries(combos).map(([k, v]) => ({ name: `${b}: ${k}`, value: v })));
   merged.sort((a, b) => b.value - a.value);
@@ -222,7 +258,7 @@ function TopCombos({ data }: { data: Record<string, Record<string, number>> }) {
     xAxis: { type: "category", data: top.map(t => t.name) },
     yAxis: { type: "value" },
     series: [{ type: "bar", data: top.map(t => t.value) }],
-  } as any;
+  } as EChartsOption;
   return <ReactECharts option={option} style={{ height: 480, minWidth: 900 }} />;
 }
 
