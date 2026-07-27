@@ -20,7 +20,7 @@
     "fast-glob": "^3.3.3",
     "lucide-react": "^1.21.0",
     "next": "15.5.18",
-    "react": "19.1.0",
+    "react": "19.2.8",
     "react-dom": "19.2.7",
     "tailwind-merge": "^3.6.0",
     "tsx": "^4.22.4"
