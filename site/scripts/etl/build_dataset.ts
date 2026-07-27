@@ -1,12 +1,18 @@
 import fg from "fast-glob";
 import { readFileSync, mkdirSync, writeFileSync } from "fs";
-import { join, dirname, resolve, sep } from "path";
+import { join, resolve } from "path";
+
+type PosTag = Record<string, string | undefined>;
 
 type Token = {
   book_chapter_verse: string;
-  pos_tag: Record<string, any>;
+  pos_tag: PosTag;
   word_forms: string[];
   gloss?: string;
+  freq_lex?: number;
+  freq_occ?: number;
+  language_status?: string;
+  mitchel?: string;
 };
 
 type Verse = Token[];
@@ -237,10 +243,10 @@ async function main() {
           wordUnpointed: wfUnpointed.trim(),
           wordPointed: wfPointed.trim(),
           gloss: tok.gloss,
-          freqLex: (tok as any).freq_lex,
-          freqOcc: (tok as any).freq_occ,
-          languageStatus: (tok as any).language_status,
-          mitchel: (tok as any).mitchel,
+          freqLex: tok.freq_lex,
+          freqOcc: tok.freq_occ,
+          languageStatus: tok.language_status,
+          mitchel: tok.mitchel,
           bookGroup,
         });
       }
@@ -353,12 +359,10 @@ async function main() {
   writeFileSync(join(outBase, "agg", "following_pos.json"), JSON.stringify(followingPosDist, null, 2));
   writeFileSync(join(outBase, "meta", "summary.json"), JSON.stringify({ totalRows: rows.length }, null, 2));
 
-  // eslint-disable-next-line no-console
   console.log(`Wrote ${rows.length} rows and aggregates to ${outBase}`);
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });
