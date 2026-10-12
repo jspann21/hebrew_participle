@@ -5,3 +5,7 @@ updates:
     directory: /site
     schedule:
       interval: weekly
+    # ESLint 10 is incompatible with the React/import/accessibility plugins.
+    ignore:
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]

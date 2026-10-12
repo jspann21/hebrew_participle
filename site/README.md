@@ -81,3 +81,15 @@ This interface is intended for comparing participial patterns such as:
 - whether local context differs by stem, usage, or morphology
 
 The goal is not to replace close reading, but to make corpus-scale patterns easier to find before returning to individual passages.
+
+## Dependency Security
+
+Install with `npm ci` so the committed lockfile and security patches are applied. The postinstall step fails if a patch cannot be applied.
+
+The `braces` dependency has no upstream release fixing [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). `patches/braces+3.0.3.patch` limits parser nesting and recursive AST traversal to 64 levels, rejecting excessive nesting with a controlled `SyntaxError`. It covers parsing, compiling, expanding, and stringifying patterns, including callers that supply an AST directly. Replace the patch with an upstream fix when one becomes available.
+
+The ETL uses Node's filesystem APIs; `braces` remains a development dependency through lint and patch tooling. `npm audit --omit=dev` checks production dependencies. A full `npm audit` still reports the unpatched upstream `braces` version and its dependency paths because audits do not inspect local patches.
+
+ESLint is pinned to 9.39.5 because the React, import, and accessibility plugins used by `eslint-config-next` do not support ESLint 10. Check plugin compatibility and run `npm run lint` before upgrading its major version.
+
+Pull requests run lint, type checking, the production dependency audit, and the static build. Deployment permissions are limited to the deployment job on `master`.

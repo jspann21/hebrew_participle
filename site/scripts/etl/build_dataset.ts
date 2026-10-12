@@ -1,5 +1,4 @@
-import fg from "fast-glob";
-import { readFileSync, mkdirSync, writeFileSync } from "fs";
+import { readFileSync, readdirSync, mkdirSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 
 type PosTag = Record<string, string | undefined>;
@@ -157,8 +156,10 @@ async function main() {
     books = JSON.parse(readFileSync(booksJsonPath, "utf8"));
   } catch {}
 
-  const pattern = join(dataRoot, "**/*_chapter_*.json").replace(/\\/g, "/");
-  const files = await fg(pattern, { dot: false, onlyFiles: true });
+  const files = readdirSync(dataRoot, { recursive: true, withFileTypes: true })
+    .filter(entry => entry.isFile() && /_chapter_.*\.json$/.test(entry.name))
+    .map(entry => join(entry.parentPath, entry.name))
+    .sort();
 
   const rows: Row[] = [];
   for (const file of files) {

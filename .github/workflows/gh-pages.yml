@@ -3,15 +3,15 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -32,14 +32,18 @@ jobs:
         working-directory: site
         run: npm ci
 
+      - name: Validate site
+        working-directory: site
+        run: |
+          npm run lint
+          npx tsc --noEmit
+          npm audit --omit=dev
+
       - name: Build site
         env:
           NEXT_PUBLIC_BASE_PATH: /hebrew_participle
         working-directory: site
-        run: |
-          # If your Next.js build also does `next export`, you're good.
-          # If not, add: npm run export
-          npm run build
+        run: npm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -47,7 +51,11 @@ jobs:
           path: site/out
 
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
